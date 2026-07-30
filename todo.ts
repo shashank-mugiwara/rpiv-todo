@@ -55,13 +55,14 @@ export { TOOL_NAME } from "./tool/types.js";
 export const DEFAULT_PROMPT_SNIPPET = "Manage a task list to track multi-step progress";
 export const DEFAULT_PROMPT_GUIDELINES: string[] = [
 	"Use `todo` for complex work with 3+ steps, when the user gives you a list of tasks, or immediately after receiving new instructions to capture requirements. Skip it for single trivial tasks and purely conversational requests.",
-	"When starting any task, mark it in_progress BEFORE beginning work. Mark it completed IMMEDIATELY when done — never batch completions. Exactly one task should be in_progress at a time.",
+	"Set a `todo` in_progress when you start it and completed when it is done — but emit that `todo` call in the SAME message as the next real tool call. Never spend a whole turn calling `todo` alone: a bookkeeping-only turn costs a full round trip and produces no work. Exactly one task should be in_progress at a time.",
+	"When you plan, emit every `todo` create for the whole plan in ONE message rather than one call per turn.",
 	"Never mark a task completed if tests are failing, the implementation is partial, or you hit unresolved errors — keep it in_progress and create a new task for the blocker instead.",
 	"Task status is a 4-state machine: pending → in_progress → completed, plus deleted as a tombstone. Pass activeForm (present-continuous label, e.g. 'researching existing tool') when marking in_progress.",
 	'To change a task\'s status, call update with the task id and the target status, e.g. {"action":"update","id":3,"status":"completed"} or {"action":"update","id":3,"status":"in_progress","activeForm":"writing tests"}. status is the field that changes the task; an update without a mutable field (status or another) is rejected.',
 	"Use blockedBy to express dependencies (A is blocked by B). On create, pass blockedBy as the initial set. On update, use addBlockedBy / removeBlockedBy (additive merge — do not resend the full array). Cycles are rejected.",
 	"list hides tombstoned (deleted) tasks by default; pass includeDeleted:true to see them. Pass status to filter by a single status.",
-	"Subject must be short and imperative (e.g. 'Research existing tool'); description is for long-form detail. activeForm is a present-continuous label shown while in_progress.",
+	"Subject must be short and imperative (e.g. 'Research existing tool'); activeForm is a present-continuous label shown while in_progress. description is for long-form detail and is not truncated — end it with a `DONE WHEN:` clause naming what must be true for the task to count as completed, so a later session can verify it rather than guess. Use metadata for structured criteria; both are read back with the `get` action.",
 ];
 
 export function registerTodoTool(pi: ExtensionAPI): void {

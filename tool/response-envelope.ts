@@ -18,6 +18,11 @@ function formatListLine(t: Task): string {
  * Multi-line presentation for the `get` action. Order of rows is pinned by
  * pre-refactor `todo.ts:354-376` — description, activeForm, blockedBy, blocks,
  * owner — so envelope-level snapshot tests stay byte-equivalent.
+ *
+ * FORK: a `metadata` row is appended after `owner`. Upstream accepts metadata
+ * on create/update and persists it, but prints it nowhere — the field is
+ * write-only, so structured completion criteria stored there can never be read
+ * back by the model. Appending keeps every pre-existing row byte-identical.
  */
 function formatGetLines(task: Task, state: TaskState): string {
 	const blocks = deriveBlocks(state.tasks).get(task.id) ?? [];
@@ -31,6 +36,9 @@ function formatGetLines(task: Task, state: TaskState): string {
 		lines.push(`  blocks: ${blocks.map((id) => `#${id}`).join(", ")}`);
 	}
 	if (task.owner) lines.push(`  owner: ${task.owner}`);
+	if (task.metadata && Object.keys(task.metadata).length > 0) {
+		lines.push(`  metadata: ${JSON.stringify(task.metadata)}`);
+	}
 	return lines.join("\n");
 }
 

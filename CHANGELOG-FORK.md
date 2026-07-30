@@ -41,3 +41,29 @@ Baseline harness: `harness/evals/todo-turn-inflation.mjs` in the harness repo.
 
 - Re-author `DEFAULT_PROMPT_GUIDELINES` so status flips ride along with the
   next real tool call instead of occupying their own turn.
+
+## v2.2.0-fork.2 — stop bookkeeping-only turns; make `metadata` readable
+
+`todo.ts` `DEFAULT_PROMPT_GUIDELINES`:
+
+- Bullet 2 rewritten. Was *"Mark it completed IMMEDIATELY when done — never
+  batch completions"*, which mandates a dedicated round trip per status flip
+  (1965 such turns measured, see fork.1). Now: emit the status flip in the
+  **same message** as the next real tool call; never spend a turn on `todo`
+  alone. This aligns with Pi's own built-in guideline about batching
+  independent tool calls, which the old bullet contradicted.
+- New bullet: emit every `create` for a plan in one message.
+- Last bullet now tells the model `description` is untruncated and should end
+  with a `DONE WHEN:` clause, so a later session can verify completion instead
+  of guessing.
+
+Note on wording: `system-prompt.js:63-68` flattens every tool's
+`promptGuidelines` into one global "Guidelines" list, so each bullet names
+`todo` explicitly rather than relying on nesting under the tool.
+
+`tool/response-envelope.ts`:
+
+- `formatGetLines` now prints a `metadata` row. Upstream accepts `metadata` on
+  create/update, persists it and replays it, but prints it in no output path —
+  the field is write-only, so anything stored there is unreadable by the model.
+  Appended after `owner` so all pre-existing rows stay byte-identical.
