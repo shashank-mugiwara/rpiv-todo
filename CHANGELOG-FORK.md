@@ -42,6 +42,20 @@ Baseline harness: `harness/evals/todo-turn-inflation.mjs` in the harness repo.
 - Re-author `DEFAULT_PROMPT_GUIDELINES` so status flips ride along with the
   next real tool call instead of occupying their own turn.
 
+## v2.2.0-fork.3 — claim the fork's identity in package metadata (2026-07-31)
+
+No behavioural change. `package.json` only:
+
+- `name` → `@shashank-mugiwara/rpiv-todo`, `version` → `2.2.0-fork.3`. Until now the
+  fork still declared itself `@juicesharp/rpiv-todo@2.2.0`, making it indistinguishable
+  from upstream to any tooling reading package metadata — an accidental
+  `pi install npm:@juicesharp/rpiv-todo` would have silently shadowed it.
+- `repository`/`homepage`/`bugs` → this repo instead of `juicesharp/rpiv-mono`.
+- `peerDependencies` for `@earendil-works/pi-ai`/`pi-coding-agent`/`pi-tui` pinned from
+  `"*"` to `">=0.83.0"`, matching the advisor fork (fork.3 there) and the installed pi.
+  `@juicesharp/rpiv-i18n` stays `"*"` — it is upstream's optional peer with its own
+  versioning, not a pi runtime package.
+
 ## v2.2.0-fork.2 — stop bookkeeping-only turns; make `metadata` readable
 
 `todo.ts` `DEFAULT_PROMPT_GUIDELINES`:
